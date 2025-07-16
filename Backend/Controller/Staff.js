@@ -12,7 +12,9 @@ const AddStaff = async (req, res) => {
 
     const existingStaff = await StaffModel.findOne({ name: name });
     if (existingStaff) {
-      return res.status(401).json("Staff Already exist");
+      return res
+        .status(401)
+        .json({ resText: "Staff Already exist", status: "exist" });
     } else {
       const hashedPassword = await bcrypt.hash(password, 10);
       await StaffModel.create({
@@ -22,7 +24,9 @@ const AddStaff = async (req, res) => {
         name: name,
         contact: contact,
       });
-      return res.status(200).json({resText:"Added Successfully", status:"OK"});
+      return res
+        .status(200)
+        .json({ resText: "Added Successfully", status: "OK" });
     }
   } catch (error) {
     console.error(error);
@@ -104,6 +108,22 @@ const DeleteStaff = async (req, res) => {
   } catch (error) {}
 };
 
+const GetStaffbyId = async (req, res) => {
+  const {id}=req.params
+  try {
+    const staffs = await StaffModel.findById(id)
+      .populate({
+        path: "role",
+        populate: {
+          path: "permission",
+          model: "Permission",
+        },
+      })
+      .exec();
+    res.status(200).json(staffs);
+  } catch (error) {
+    return res.status(500).json("Internal Server Error");
+  }
+};
 
-
-export default { AddStaff, GetAllStaff, StaffLogin, UpdateStaff,DeleteStaff };
+export default { AddStaff, GetAllStaff, StaffLogin, UpdateStaff, DeleteStaff,GetStaffbyId };

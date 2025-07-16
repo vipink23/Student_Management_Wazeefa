@@ -8,6 +8,8 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import Swal from "sweetalert2";
+import Swall from "sweetalert2";
 
 const style = {
   position: "absolute",
@@ -22,7 +24,13 @@ const style = {
   p: 4,
 };
 
-export default function CreateStaffModal({ open, handleClose, title }) {
+export default function CreateStaffModal({
+  open,
+  handleClose,
+  onSuccess,
+  editData,
+  value,
+}) {
   const [roles, setRoles] = useState([]);
   const [formData, setFormData] = useState({
     name: "",
@@ -31,7 +39,6 @@ export default function CreateStaffModal({ open, handleClose, title }) {
     username: "",
     password: "",
   });
-
   const GetAllRoles = async () => {
     try {
       const res = await axios.get("http://localhost:8080/GetAllRole");
@@ -52,8 +59,49 @@ export default function CreateStaffModal({ open, handleClose, title }) {
   };
 
   const handleSubmit = async () => {
-    console.log(formData, "data");
+    try {
+      const res = await axios.post("http://localhost:8080/AddStaff", formData);
+      if (res.data.status === "OK" && res.status === 200) {
+        handleClose();
+
+        Swal.fire({
+          position: "top-end",
+          icon: "success",
+          title: "Your work has been saved",
+          showConfirmButton: false,
+          timer: 1900,
+        });
+        if (onSuccess) onSuccess();
+      } else if (res.data.status === "exist") {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: res.data.resText,
+          footer: '<a href="#">Why do I have this issue?</a>',
+        });
+      }
+    } catch (error) {
+      console.log(error, "error");
+      handleClose();
+
+      if (error.response.data.status === "exist") {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: error.response.data.resText,
+          footer: '<a href="#">Why do I have this issue?</a>',
+        });
+      }
+    }
   };
+
+  const getstaffbyId =async ()=>{
+    try {
+        const res = await axios.get()
+    } catch (error) {
+        
+    }
+  }
 
   return (
     <Modal
@@ -65,7 +113,7 @@ export default function CreateStaffModal({ open, handleClose, title }) {
     >
       <Box sx={style}>
         <Typography variant="h6" component="h2" gutterBottom>
-          ADD {title}
+          {value === "edit" ? "EDIT  STAFF" : "ADD STAFF"}
         </Typography>
 
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 4 }}>
@@ -139,11 +187,7 @@ export default function CreateStaffModal({ open, handleClose, title }) {
           <Button color="secondary" onClick={handleClose}>
             Cancel
           </Button>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={ handleSubmit}
-          >
+          <Button variant="contained" color="primary" onClick={handleSubmit}>
             Submit
           </Button>
         </Box>

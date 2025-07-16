@@ -13,11 +13,20 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
+import IconButton from "@mui/material/IconButton";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { useState } from "react";
 import ModalForm from "../Pages/Modal";
 import CreateStaffModal from "../Pages/CreateStaffModal";
 
-export default function DataTable({ TableTitle, data = [], columns = [] }) {
+export default function DataTable({
+  TableTitle,
+  data = [],
+  columns = [],
+  onSuccess,
+  handleEdit,
+}) {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [open, setOpen] = useState(false);
@@ -35,6 +44,7 @@ export default function DataTable({ TableTitle, data = [], columns = [] }) {
   };
 
   const isPermissionPage = window.location.pathname === "/PermissionMaster";
+  const isStaffPage = window.location.pathname === "/StaffMaster";
 
   return (
     <Paper sx={{ width: "100%", overflow: "hidden" }}>
@@ -88,7 +98,7 @@ export default function DataTable({ TableTitle, data = [], columns = [] }) {
                     hover
                     role="checkbox"
                     tabIndex={-1}
-                    key={row.id || index}
+                    key={row._id || index}
                   >
                     {columns.map((column) => {
                       let value;
@@ -100,10 +110,32 @@ export default function DataTable({ TableTitle, data = [], columns = [] }) {
                       }
 
                       return (
-                        <TableCell key={column.id} align={column.align || "left"}>
-                          {column.format && typeof value === "number"
-                            ? column.format(value)
-                            : value}
+                        <TableCell
+                          key={column.id}
+                          align={column.align || "left"}
+                        >
+                          {column.id === "_id" ? (
+                            <>
+                              <IconButton
+                                onClick={() => handleEdit(row._id, "edit")}
+                                color="primary"
+                                size="small"
+                              >
+                                <EditIcon />
+                              </IconButton>
+                              <IconButton
+                                onClick={() => console.log("Delete", row)} // add your delete logic
+                                color="error"
+                                size="small"
+                              >
+                                <DeleteIcon />
+                              </IconButton>
+                            </>
+                          ) : column.format && typeof value === "number" ? (
+                            column.format(value)
+                          ) : (
+                            value
+                          )}
                         </TableCell>
                       );
                     })}
@@ -125,8 +157,23 @@ export default function DataTable({ TableTitle, data = [], columns = [] }) {
       />
 
       {/* Modal */}
-      {location.pathname ==="/StaffMaster" ? <CreateStaffModal open={open} handleClose={handleCloseModal} title={TableTitle} /> : <ModalForm open={open} handleClose={handleCloseModal} title={TableTitle} />}
-
+      {isStaffPage ? (
+        <CreateStaffModal
+          open={open}
+          handleClose={handleCloseModal}
+          title={TableTitle}
+          onSuccess={() => {
+            handleCloseModal(); // Close modal
+            if (onSuccess) onSuccess(); // Notify parent to refresh data
+          }}
+        />
+      ) : (
+        <ModalForm
+          open={open}
+          handleClose={handleCloseModal}
+          title={TableTitle}
+        />
+      )}
     </Paper>
   );
 }
