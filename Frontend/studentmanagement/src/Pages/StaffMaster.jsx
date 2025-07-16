@@ -33,15 +33,19 @@ const StaffMaster = () => {
     setLoad((prev) => !prev);
   };
 
-  const [editData, setEditData] = useState(null);
-
-  const handleEdit = (row, val) => {
-    setEditData(row);
+const [editData, setEditData] = useState(null);
+ const handleEdit = async (id, val) => {
     setVal(val)
-    console.log(val, "val");
-
+  try {
+    const res = await axios.get(`http://localhost:8080/StaffById/${id}`);
+    console.log(res.data, "response");
+    setEditData(res.data); 
     setOpen(true); // open modal
-  };
+  } catch (error) {
+    console.error("Error fetching staff by ID:", error);
+  }
+};
+
 
   return (
     <div>

@@ -95,13 +95,28 @@ export default function CreateStaffModal({
     }
   };
 
-  const getstaffbyId =async ()=>{
-    try {
-        const res = await axios.get()
-    } catch (error) {
-        
+  useEffect(() => {
+    if (editData) {
+      setFormData({
+        name: editData?.name || "",
+        contact: editData?.contact || "",
+        role: editData?.role?._id || "",
+        username: editData?.username || "",
+      });
     }
-  }
+  }, [editData]);
+
+  const handleUpdate = async () => {
+    console.log(editData);
+  const data = {
+    name: formData.name !== editData?.name ? formData.name : editData?.name,
+    contact: formData.contact !== editData?.contact ? formData.contact : editData?.contact,
+    role: formData.role !== editData?.role?._id ? formData.role : editData?.role?._id,
+    username: formData.username !== editData?.username ? formData.username : editData?.username,
+    password: editData?.password,
+  };
+    console.log(data);
+  };
 
   return (
     <Modal
@@ -126,6 +141,7 @@ export default function CreateStaffModal({
               fullWidth
               size="small"
               onChange={handleChange}
+              value={formData.name}
             />
             <TextField
               label="Contact"
@@ -133,6 +149,7 @@ export default function CreateStaffModal({
               name="contact"
               fullWidth
               size="small"
+              value={formData.contact}
               onChange={handleChange}
             />
           </Box>
@@ -164,21 +181,27 @@ export default function CreateStaffModal({
               name="username"
               fullWidth
               size="small"
+              value={formData.username}
               onChange={handleChange}
             />
           </Box>
 
           {/* Row 3 */}
-          <Box sx={{ display: "flex", gap: 2 }}>
-            <TextField
-              label="Password"
-              type="password"
-              name="password"
-              style={{ width: "49%" }}
-              size="small"
-              onChange={handleChange}
-            />
-          </Box>
+          {value === "edit" ? (
+            ""
+          ) : (
+            <Box sx={{ display: "flex", gap: 2 }}>
+              <TextField
+                label="Password"
+                type="password"
+                name="password"
+                style={{ width: "49%" }}
+                size="small"
+                value={formData.password}
+                onChange={handleChange}
+              />
+            </Box>
+          )}
         </Box>
 
         <Box
@@ -187,9 +210,15 @@ export default function CreateStaffModal({
           <Button color="secondary" onClick={handleClose}>
             Cancel
           </Button>
-          <Button variant="contained" color="primary" onClick={handleSubmit}>
-            Submit
-          </Button>
+          {value === "edit" ? (
+            <Button variant="contained" color="primary" onClick={handleUpdate}>
+              Update
+            </Button>
+          ) : (
+            <Button variant="contained" color="primary" onClick={handleSubmit}>
+              Submit
+            </Button>
+          )}
         </Box>
       </Box>
     </Modal>
