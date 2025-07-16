@@ -24,7 +24,7 @@ export default function MainLayout() {
             sx={{
               flexGrow: 1,
               width: "100%",
-              mt: 8, // if you have a fixed AppBar
+              mt: 8,
               p: 0,
               transition: "margin 0.3s",
               //   marginLeft: open ? `${drawerWidth}px` : "0px", // adjust as needed
@@ -34,9 +34,10 @@ export default function MainLayout() {
               elevation={0}
               sx={{
                 p: 2,
-                bgcolor: "grey.50",
+                bgcolor: "grey.20",
                 boxShadow: "none",
                 border: "none",
+                mt:4
               }}
             >
               <Outlet />
@@ -48,7 +49,7 @@ export default function MainLayout() {
         <Box
           component="footer"
           sx={{
-            bgcolor: "grey.200",
+            bgcolor: "grey.50",
             p: 2,
             mt: 8,
             transition: "margin 0.3s",

@@ -11,7 +11,6 @@ import GitHubIcon from "@mui/icons-material/GitHub";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import TwitterIcon from "@mui/icons-material/X";
 
-
 export default function Footer() {
   return (
     <Container
@@ -197,7 +196,6 @@ export default function Footer() {
           <IconButton
             color="inherit"
             size="small"
-            href="https://www.linkedin.com/company/mui/"
             aria-label="LinkedIn"
             sx={{ alignSelf: "center" }}
           >
