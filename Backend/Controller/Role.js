@@ -17,14 +17,22 @@ const AddRole = async (req, res) => {
 const GetAllRoles = async (req, res) => {
   try {
     const roles = await RoleModel.find({}).populate("permission").exec();
-    const RoleDetails = roles.map((rl)=>({
-      _id:rl?._id,
-      name:rl?.name,
-      permissions:rl?.permission?.map((perm) => perm.name.toUpperCase()) || []
+    // const RoleDetails = roles.map((rl)=>({
+    //   _id:rl?._id,
+    //   name:rl?.name,
+    //   permissions:rl?.permission?.map((perm) => perm.name.toUpperCase()) || []
 
-    }))
+    // }))
+    const RoleDetails = roles
+      .filter((rl) => rl.name !== "Super Admin")
+      .map((rl) => ({
+        _id: rl?._id,
+        name: rl?.name,
+        permissions:
+          rl?.permission?.map((perm) => perm.name.toUpperCase()) || [],
+      }));
 
-    res.status(200).json(RoleDetails)
+    res.status(200).json(RoleDetails);
   } catch (error) {
     return res.status(500).json("Internal Server Error");
   }
