@@ -1,4 +1,5 @@
 import UserModel from "../Model/Auth.js";
+import StaffModel from '../Model/Staff.js'
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
@@ -30,31 +31,93 @@ const Register = async (req, res) => {
   }
 };
 
-const Login = async (req, res) => {
+// const Login = async (req, res) => {
+//   const { username, password } = req.body;
+//   try {
+//     const user = await UserModel.findOne({ username: username });
+//     if (!user) return res.status(404).json({ message: "username not found" });
+
+//     const isMatch = await bcrypt.compare(password, user.password);
+//     if (!isMatch)
+//       return res.status(400).json({ message: "Invalid Credential" });
+//     const accessToken = jwt.sign(
+//       {
+//         id: user._id,
+//         username: user.username,
+//         name:user.firstname +" "+ user.lastname,
+//         role: user.role,
+//       },
+//       process.env.ACCESS_TOKEN,
+//       { expiresIn: "1h" }
+//     );
+//     return res.status(200).json({
+//       accessToken,
+//     });
+//   } catch (error) {
+//     return res.status(500).json("Internal Server Error");
+//   }
+// };
+
+
+
+
+const UnifiedLogin = async (req, res) => {
   const { username, password } = req.body;
+
   try {
-    const user = await UserModel.findOne({ username: username });
+    // Try finding in StaffModel first
+    let user = await StaffModel.findOne({ username }).populate("role").exec();
+    if (user) {
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch)
+        return res.status(400).json({ message: "Invalid Credential" });
+
+      const accessToken = jwt.sign(
+        {
+          id: user._id,
+          username: user.username,
+          name: user.name,
+          // role: {
+          //   rolename: user.role.name,
+          //   role_id: user.role._id,
+          // },
+          role:user?.role?.name,
+          role_id:user?.role?._id
+          
+        },
+        process.env.ACCESS_TOKEN,
+        { expiresIn: "1h" }
+      );
+
+      return res.status(200).json({ accessToken, status:"OK" });
+    }
+
+    // If not in staff, try UserModel
+    user = await UserModel.findOne({ username });
     if (!user) return res.status(404).json({ message: "username not found" });
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch)
       return res.status(400).json({ message: "Invalid Credential" });
+
     const accessToken = jwt.sign(
       {
         id: user._id,
         username: user.username,
-        name:user.firstname +" "+ user.lastname,
+        username:user.firstname +" "+ user.lastname,
         role: user.role,
       },
       process.env.ACCESS_TOKEN,
       { expiresIn: "1h" }
     );
-    return res.status(200).json({
-      accessToken,
-    });
+
+    return res.status(200).json({ accessToken, status:"OK" });
   } catch (error) {
-    return res.status(500).json("Internal Server Error");
+    console.error("Login error:", error);
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
-export default {Register,Login}
+
+
+export default {Register,UnifiedLogin}

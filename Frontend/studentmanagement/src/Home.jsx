@@ -1,9 +1,8 @@
-import React from "react";
-import DataTable from "./Components/DataTable";
+
 
 const Home = () => {
   return <div>
-    <DataTable/>
+    <h4>DASH BOARD</h4>
   </div>;
 };
 

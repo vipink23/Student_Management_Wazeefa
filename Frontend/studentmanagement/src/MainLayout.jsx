@@ -16,7 +16,6 @@ export default function MainLayout() {
         sx={{ display: "flex", minHeight: "100vh", flexDirection: "column" }}
       >
         <Box sx={{ display: "flex", flexGrow: 1 }}>
-          {/* Sidebar */}
           <Sidebar open={open} setOpen={setOpen} />
 
           {/* Main Content */}
@@ -27,7 +26,6 @@ export default function MainLayout() {
               mt: 8,
               p: 0,
               transition: "margin 0.3s",
-              //   marginLeft: open ? `${drawerWidth}px` : "0px", // adjust as needed
             }}
           >
             <Paper
@@ -44,8 +42,6 @@ export default function MainLayout() {
             </Paper>
           </Box>
         </Box>
-
-        {/* Footer with dynamic marginLeft */}
         <Box
           component="footer"
           sx={{
@@ -53,7 +49,7 @@ export default function MainLayout() {
             p: 2,
             mt: 8,
             transition: "margin 0.3s",
-            marginLeft: open ? `${drawerWidth}px` : "65px", // same logic as main content
+            marginLeft: open ? `${drawerWidth}px` : "65px", 
           }}
         >
           <Footer />

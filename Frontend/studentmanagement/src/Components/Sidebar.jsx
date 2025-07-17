@@ -1,4 +1,3 @@
-import * as React from "react";
 import { styled, useTheme } from "@mui/material/styles";
 import {
   Box,
@@ -26,6 +25,9 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import { useNavigate } from "react-router";
+import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Logout } from "../Auth/Features/Redux-Auth/UserSlicer";
 
 const drawerWidth = 240;
 
@@ -102,8 +104,10 @@ const Drawer = styled(MuiDrawer, {
 export default function Sidebar({ open, setOpen }) {
   const navigate = useNavigate();
   const theme = useTheme();
-  const [openMaster, setOpenMaster] = React.useState(false);
-  const [openStaff, setOpenStaff] = React.useState(false);
+  const dispatch = useDispatch();
+  const [openMaster, setOpenMaster] = useState(false);
+  const [openStaff, setOpenStaff] = useState(false);
+  const user = useSelector((state) => state.user.user);
 
   const handleDrawerOpen = () => setOpen(true);
   const handleDrawerClose = () => setOpen(false);
@@ -147,103 +151,155 @@ export default function Sidebar({ open, setOpen }) {
           </Typography>
 
           <Box sx={{ flexGrow: 1 }} />
-          <IconButton
-            color="inherit"
-            onClick={() => console.log("User icon clicked")}
-          >
+          <h6>Hello {user?.name ? user.name : user?.role}</h6>
+
+          <IconButton color="inherit" onClick={() => dispatch(Logout())}>
             <AccountCircleIcon />
           </IconButton>
         </Toolbar>
       </AppBar>
 
-      <Drawer variant="permanent" open={open}>
-        <DrawerHeader>
-          <IconButton onClick={handleDrawerClose}>
-            {theme.direction === "rtl" ? (
-              <ChevronRightIcon />
-            ) : (
-              <ChevronLeftIcon />
-            )}
-          </IconButton>
-        </DrawerHeader>
-        <Divider />
+      {user.role === "Super Admin" ? (
+        <Drawer variant="permanent" open={open}>
+          <DrawerHeader>
+            <IconButton onClick={handleDrawerClose}>
+              {theme.direction === "rtl" ? (
+                <ChevronRightIcon />
+              ) : (
+                <ChevronLeftIcon />
+              )}
+            </IconButton>
+          </DrawerHeader>
+          <Divider />
 
-        <List>
-          {/* Master Menu */}
-          <ListItem disablePadding sx={{ display: "block" }}>
-            <ListItemButton
-              onClick={handleClickMaster}
-              sx={{
-                minHeight: 48,
-                px: 2.5,
-                justifyContent: open ? "initial" : "center",
-              }}
-            >
-              <ListItemIcon
+          <List>
+            {/* Master Menu */}
+            <ListItem disablePadding sx={{ display: "block" }}>
+              <ListItemButton
+                onClick={handleClickMaster}
                 sx={{
-                  minWidth: 0,
-                  mr: open ? 3 : "auto",
-                  justifyContent: "center",
+                  minHeight: 48,
+                  px: 2.5,
+                  justifyContent: open ? "initial" : "center",
                 }}
               >
-                <InboxIcon />
-              </ListItemIcon>
-              <ListItemText primary="Master" sx={{ opacity: open ? 1 : 0 }} />
-              {open && (openMaster ? <ExpandLess /> : <ExpandMore />)}
-            </ListItemButton>
-            <Collapse in={openMaster} timeout="auto" unmountOnExit>
-              <List component="div" disablePadding>
-                {["Role", "Permission"].map((subItem) => (
-                  <ListItemButton
-                    key={subItem}
-                    sx={{ pl: 4 }}
-                    onClick={() => handleList(subItem)}
-                  >
-                    <ListItemText primary={subItem} />
-                  </ListItemButton>
-                ))}
-              </List>
-            </Collapse>
-          </ListItem>
+                <ListItemIcon
+                  sx={{
+                    minWidth: 0,
+                    mr: open ? 3 : "auto",
+                    justifyContent: "center",
+                  }}
+                >
+                  <InboxIcon />
+                </ListItemIcon>
+                <ListItemText primary="Master" sx={{ opacity: open ? 1 : 0 }} />
+                {open && (openMaster ? <ExpandLess /> : <ExpandMore />)}
+              </ListItemButton>
+              <Collapse in={openMaster} timeout="auto" unmountOnExit>
+                <List component="div" disablePadding>
+                  {["Permission", "Role"].map((subItem) => (
+                    <ListItemButton
+                      key={subItem}
+                      sx={{ pl: 4 }}
+                      onClick={() => handleList(subItem)}
+                    >
+                      <ListItemText primary={subItem} />
+                    </ListItemButton>
+                  ))}
+                </List>
+              </Collapse>
+            </ListItem>
 
-          {/* Staff Menu */}
-          <ListItem disablePadding sx={{ display: "block" }}>
-            <ListItemButton
-              onClick={handleClickStaff}
-              sx={{
-                minHeight: 48,
-                px: 2.5,
-                justifyContent: open ? "initial" : "center",
-              }}
-            >
-              <ListItemIcon
+            {/* Staff Menu */}
+            <ListItem disablePadding sx={{ display: "block" }}>
+              <ListItemButton
+                onClick={handleClickStaff}
                 sx={{
-                  minWidth: 0,
-                  mr: open ? 3 : "auto",
-                  justifyContent: "center",
+                  minHeight: 48,
+                  px: 2.5,
+                  justifyContent: open ? "initial" : "center",
                 }}
               >
-                <AccountCircleIcon />
-              </ListItemIcon>
-              <ListItemText primary="User" sx={{ opacity: open ? 1 : 0 }} />
-              {open && (openStaff ? <ExpandLess /> : <ExpandMore />)}
-            </ListItemButton>
-            <Collapse in={openStaff} timeout="auto" unmountOnExit>
-              <List component="div" disablePadding>
-                {["Staff", "Student"].map((subItem) => (
-                  <ListItemButton
-                    key={subItem}
-                    sx={{ pl: 4 }}
-                    onClick={() => handleList(subItem)}
-                  >
-                    <ListItemText primary={subItem} />
-                  </ListItemButton>
-                ))}
-              </List>
-            </Collapse>
-          </ListItem>
-        </List>
-      </Drawer>
+                <ListItemIcon
+                  sx={{
+                    minWidth: 0,
+                    mr: open ? 3 : "auto",
+                    justifyContent: "center",
+                  }}
+                >
+                  <AccountCircleIcon />
+                </ListItemIcon>
+                <ListItemText primary="User" sx={{ opacity: open ? 1 : 0 }} />
+                {open && (openStaff ? <ExpandLess /> : <ExpandMore />)}
+              </ListItemButton>
+              <Collapse in={openStaff} timeout="auto" unmountOnExit>
+                <List component="div" disablePadding>
+                  {["Staff", "Student"].map((subItem) => (
+                    <ListItemButton
+                      key={subItem}
+                      sx={{ pl: 4 }}
+                      onClick={() => handleList(subItem)}
+                    >
+                      <ListItemText primary={subItem} />
+                    </ListItemButton>
+                  ))}
+                </List>
+              </Collapse>
+            </ListItem>
+          </List>
+        </Drawer>
+      ) : (
+        <Drawer variant="permanent" open={open}>
+          <DrawerHeader>
+            <IconButton onClick={handleDrawerClose}>
+              {theme.direction === "rtl" ? (
+                <ChevronRightIcon />
+              ) : (
+                <ChevronLeftIcon />
+              )}
+            </IconButton>
+          </DrawerHeader>
+          <Divider />
+
+          <List>
+            <ListItem disablePadding sx={{ display: "block" }}>
+              <ListItemButton
+                onClick={handleClickStaff}
+                sx={{
+                  minHeight: 48,
+                  px: 2.5,
+                  justifyContent: open ? "initial" : "center",
+                }}
+              >
+                <ListItemIcon
+                  sx={{
+                    minWidth: 0,
+                    mr: open ? 3 : "auto",
+                    justifyContent: "center",
+                  }}
+                >
+                  <AccountCircleIcon />
+                </ListItemIcon>
+                <ListItemText primary="User" sx={{ opacity: open ? 1 : 0 }} />
+                {open && (openStaff ? <ExpandLess /> : <ExpandMore />)}
+              </ListItemButton>
+              <Collapse in={openStaff} timeout="auto" unmountOnExit>
+                <List component="div" disablePadding>
+                  {["Student"].map((subItem) => (
+                    <ListItemButton
+                      key={subItem}
+                      sx={{ pl: 4 }}
+                      onClick={() => handleList(subItem)}
+                    >
+                      <ListItemText primary={subItem} />
+                    </ListItemButton>
+                  ))}
+                </List>
+              </Collapse>
+            </ListItem>
+          </List>
+        </Drawer>
+      )}
     </Box>
   );
 }

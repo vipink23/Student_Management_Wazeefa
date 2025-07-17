@@ -45,42 +45,57 @@ const GetAllStaff = async (req, res) => {
         },
       })
       .exec();
-    res.status(200).json(staffs);
-  } catch (error) {
-    return res.status(500).json("Internal Server Error");
-  }
-};
-const StaffLogin = async (req, res) => {
-  const { username, password } = req.body;
-  try {
-    const user = await StaffModel.findOne({ username: username })
-      .populate("role")
-      .exec();
-    if (!user) return res.status(404).json({ message: "username not found" });
+    console.log(staffs);
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch)
-      return res.status(400).json({ message: "Invalid Credential" });
-    const accessToken = jwt.sign(
-      {
-        id: user._id,
-        username: user.username,
-        name: user.name,
-        role: {
-          rolename: user.role.name,
-          role_id: user.role._id,
-        },
-      },
-      process.env.ACCESS_TOKEN,
-      { expiresIn: "1h" }
-    );
-    return res.status(200).json({
-      accessToken,
-    });
+    const staffsdetails = staffs?.map((staff) => ({
+      _id: staff._id,
+      name: staff.name,
+      contact: staff.contact,
+      username: staff.username,
+      password: staff?.password,
+      role_id: staff?.role?._id,
+      rolename: staff?.role?.name,
+      permission:
+        staff?.role?.permission?.map((perm) => perm.name.toUpperCase()) || [],
+    }));
+
+    res.status(200).json(staffsdetails);
   } catch (error) {
     return res.status(500).json("Internal Server Error");
   }
 };
+// const StaffLogin = async (req, res) => {
+//   const { username, password } = req.body;
+//   try {
+//     const user = await StaffModel.findOne({ username: username })
+//       .populate("role")
+//       .exec();
+//     if (!user) return res.status(404).json({ message: "username not found" });
+
+//     const isMatch = await bcrypt.compare(password, user.password);
+//     if (!isMatch)
+//       return res.status(400).json({ message: "Invalid Credential" });
+//     const accessToken = jwt.sign(
+//       {
+//         id: user._id,
+//         username: user.username,
+//         name: user.name,
+//         role: {
+//           rolename: user.role.name,
+//           role_id: user.role._id,
+//         },
+//       },
+//       process.env.ACCESS_TOKEN,
+//       { expiresIn: "1h" }
+//     );
+//     return res.status(200).json({
+//       accessToken,
+//     });
+//   } catch (error) {
+//     return res.status(500).json("Internal Server Error");
+//   }
+// };
+
 const UpdateStaff = async (req, res) => {
   const { id } = req.params;
   try {
@@ -91,7 +106,7 @@ const UpdateStaff = async (req, res) => {
     if (!staff) {
       return res.status(404).json({ resText: "Student not found" });
     }
-    await StaffModel.findByIdAndUpdate(id, req.body , { new: true });
+    await StaffModel.findByIdAndUpdate(id, req.body, { new: true });
     return res
       .status(200)
       .json({ resText: "Updated Successfully", status: "OK" });
@@ -109,7 +124,7 @@ const DeleteStaff = async (req, res) => {
 };
 
 const GetStaffbyId = async (req, res) => {
-  const {id}=req.params
+  const { id } = req.params;
   try {
     const staffs = await StaffModel.findById(id)
       .populate({
@@ -126,4 +141,10 @@ const GetStaffbyId = async (req, res) => {
   }
 };
 
-export default { AddStaff, GetAllStaff, StaffLogin, UpdateStaff, DeleteStaff,GetStaffbyId };
+export default {
+  AddStaff,
+  GetAllStaff,
+  UpdateStaff,
+  DeleteStaff,
+  GetStaffbyId,
+};

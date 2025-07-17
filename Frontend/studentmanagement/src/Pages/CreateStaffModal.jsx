@@ -196,7 +196,7 @@ export default function CreateStaffModal({
               </MenuItem>
               {roles?.map((item) => (
                 <MenuItem key={item?._id} value={item?._id}>
-                  {item?.name}
+                  {item?.name + "  (" + item?.permissions?.join(", ") + ")"}
                 </MenuItem>
               ))}
             </TextField>

@@ -72,7 +72,7 @@ const StudentMaster = () => {
         if (resp.data.status === "OK" && resp.status === 200) {
           Swal.fire({
             title: "Deleted!",
-            text: "Staff has been deleted.",
+            text: "Student has been deleted.",
             icon: "success",
           });
           handleReload();

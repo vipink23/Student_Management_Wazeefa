@@ -6,5 +6,5 @@ import AuthController from '../Controller/Auth.js'
 const routes = express.Router();
 
 routes.post("/Register", AuthController.Register);
-routes.post("/Login", AuthController.Login);
+routes.post("/Login", AuthController.UnifiedLogin);
 export default routes
