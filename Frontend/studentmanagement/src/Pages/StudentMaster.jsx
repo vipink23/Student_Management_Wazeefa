@@ -5,6 +5,7 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import StudentModal from "./StudentModal";
 import { useSelector } from "react-redux";
+import { jwtDecode } from "jwt-decode";
 
 const StudentMaster = () => {
   const [students, setStudent] = useState([]);
@@ -12,12 +13,17 @@ const StudentMaster = () => {
   const [open, setOpen] = useState(false);
   const [val, setVal] = useState({ val: "", id: "" });
   const user = useSelector((state) => state.user.user);
-  const staffId = user?.id;
-  const permissions = user.permission;
+  const [decoded] = useState(() => {
+    return jwtDecode(user?.token);
+  });
+
   const getAllStudent = async (staffId) => {
     try {
       const res = await axios.get("http://localhost:8080/GetAllStudent", {
         params: { id: staffId },
+        headers: {
+          Authorization: `Bearer ${user?.token}`,
+        },
       });
       setStudent(res.data);
     } catch (error) {
@@ -26,10 +32,10 @@ const StudentMaster = () => {
   };
 
   useEffect(() => {
-    if (user.role === "Super Admin") {
+    if (decoded.role === "Super Admin") {
       getAllStudent();
     } else {
-      getAllStudent(staffId);
+      getAllStudent(decoded.id);
     }
   }, [load]);
   const Column = [
@@ -56,10 +62,19 @@ const StudentMaster = () => {
       id: id,
     }));
     try {
-      const res = await axios.post(`http://localhost:8080/GetStudentById`, {
-        id,
-        permissions,
-      });
+      const res = await axios.post(
+        `http://localhost:8080/GetStudentById`,
+        {
+          id,
+          permissions: decoded?.permission, // if needed in body
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${user?.token}`,
+          },
+        }
+      );
+
       setEditData(res.data);
       setOpen(true);
     } catch (error) {
@@ -87,7 +102,7 @@ const StudentMaster = () => {
       if (result.isConfirmed) {
         const resp = await axios.post("http://localhost:8080/DeleteStudent", {
           id,
-          permissions,
+          permissions: decoded?.permission,
         });
         if (resp.data.status === "OK" && resp.status === 200) {
           Swal.fire({
@@ -105,7 +120,6 @@ const StudentMaster = () => {
         }
       }
     } catch (error) {
-      console.error("Delete error:", error);
       if (error.response.data.status === false && error.status === 403) {
         Swal.fire({
           icon: "error",

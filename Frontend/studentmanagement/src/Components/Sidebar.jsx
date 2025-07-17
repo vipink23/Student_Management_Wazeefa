@@ -28,6 +28,7 @@ import { useNavigate } from "react-router";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Logout } from "../Auth/Features/Redux-Auth/UserSlicer";
+import { jwtDecode } from "jwt-decode";
 
 const drawerWidth = 240;
 
@@ -108,6 +109,9 @@ export default function Sidebar({ open, setOpen }) {
   const [openMaster, setOpenMaster] = useState(false);
   const [openStaff, setOpenStaff] = useState(false);
   const user = useSelector((state) => state.user.user);
+    const [decoded] = useState(() => {
+      return jwtDecode(user?.token);
+    });
 
   const handleDrawerOpen = () => setOpen(true);
   const handleDrawerClose = () => setOpen(false);
@@ -151,7 +155,7 @@ export default function Sidebar({ open, setOpen }) {
           </Typography>
 
           <Box sx={{ flexGrow: 1 }} />
-          <h6>Hello {user?.name ? user.name : user?.role}</h6>
+          <h6>Hello {decoded?.name ? decoded.name : decoded?.role}</h6>
 
           <IconButton color="inherit" onClick={() => dispatch(Logout())}>
             <AccountCircleIcon />
@@ -159,7 +163,7 @@ export default function Sidebar({ open, setOpen }) {
         </Toolbar>
       </AppBar>
 
-      {user.role === "Super Admin" ? (
+      {decoded?.role === "Super Admin" ? (
         <Drawer variant="permanent" open={open}>
           <DrawerHeader>
             <IconButton onClick={handleDrawerClose}>

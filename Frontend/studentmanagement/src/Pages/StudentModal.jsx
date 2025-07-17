@@ -7,6 +7,7 @@ import {
   MenuItem,
 } from "@mui/material";
 import axios from "axios";
+import { jwtDecode } from "jwt-decode";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import Swal from "sweetalert2";
@@ -40,11 +41,17 @@ export default function StudentModal({
     staff: "",
   });
   const user = useSelector((state) => state.user.user);
-  let permissions = user?.permission;
+  const [decoded] = useState(() => {
+    return jwtDecode(user?.token);
+  });
 
   const GetAllStaff = async () => {
     try {
-      const res = await axios.get("http://localhost:8080/GetAllStaff");
+      const res = await axios.get("http://localhost:8080/GetAllStaff", {
+        headers: {
+          Authorization: `Bearer ${user?.token}`,
+        },
+      });
       setStaff(res?.data);
     } catch (error) {
       console.log(error, "err");
@@ -61,8 +68,8 @@ export default function StudentModal({
     }));
   };
   useEffect(() => {
-    if (user?.role !== "Super Admin" && user?.id) {
-      setFormData((prev) => ({ ...prev, staff: user.id }));
+    if (decoded?.role !== "Super Admin" && decoded?.id) {
+      setFormData((prev) => ({ ...prev, staff: decoded.id }));
     }
   }, [user]);
 
@@ -70,7 +77,7 @@ export default function StudentModal({
     try {
       const res = await axios.post("http://localhost:8080/AddStudent", {
         ...formData,
-        permissions,
+        permissions: decoded?.permission,
       });
       if (res.data.status === "OK" && res.status === 200) {
         if (onSuccess) onSuccess();
@@ -232,19 +239,21 @@ export default function StudentModal({
               size="small"
               style={{ width: "49%" }}
               value={
-                user?.role === "Super Admin"
+                decoded?.role === "Super Admin"
                   ? formData.staff || ""
-                  : user?.id || ""
+                  : decoded?.id || ""
               }
-              onChange={user?.role === "Super Admin" ? handleChange : undefined}
-              disabled={user?.role !== "Super Admin"}
+              onChange={
+                decoded?.role === "Super Admin" ? handleChange : undefined
+              }
+              disabled={decoded?.role !== "Super Admin"}
               error={
-                user?.role === "Super Admin" &&
+                decoded?.role === "Super Admin" &&
                 formData.staff &&
                 !staff?.some((item) => item._id === formData.staff)
               }
               helperText={
-                user?.role === "Super Admin" &&
+                decoded?.role === "Super Admin" &&
                 formData.staff &&
                 !staff?.some((item) => item._id === formData.staff)
                   ? "Selected staff is not available in the list."

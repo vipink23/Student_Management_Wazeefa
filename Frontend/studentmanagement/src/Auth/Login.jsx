@@ -95,8 +95,10 @@ const LoginPage = () => {
     if (resp.data.status === "OK" && resp.status === 200) {
       setIsLoading(true);
       const decoded = jwtDecode(resp.data.accessToken);
-      dispatch(Login(decoded));
-      if (decoded.role === "Super Admin") {
+      dispatch(Login({token:resp.data.accessToken}));
+      console.log(decoded,'decodeeee');
+      
+      if (decoded?.role === "Super Admin") {
         setTimeout(() => {
           navigate("/");
         }, 2000);

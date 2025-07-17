@@ -3,16 +3,23 @@ import DataTable from "../Components/DataTable";
 import axios from "axios";
 import CreateStaffModal from "./CreateStaffModal";
 import Swal from "sweetalert2";
+import { useSelector } from "react-redux";
 
 const StaffMaster = () => {
   const [staff, setStaff] = useState([]);
   const [load, setLoad] = useState(false);
   const [open, setOpen] = useState(false);
   const [val, setVal] = useState({ val: "", id: "" });
+  const user = useSelector((state) => state.user.user);
 
   const getAllStaff = async () => {
     try {
-      const res = await axios.get("http://localhost:8080/GetAllStaff");
+      const res = await axios.get("http://localhost:8080/GetAllStaff", {
+        headers: {
+          Authorization: `Bearer ${user?.token}`,
+        },
+      });
+
       setStaff(res.data);
     } catch (error) {
       console.log(error, "err");
@@ -73,7 +80,7 @@ const StaffMaster = () => {
             text: "Staff has been deleted.",
             icon: "success",
           });
-          handleReload()
+          handleReload();
         } else {
           Swal.fire({
             icon: "error",

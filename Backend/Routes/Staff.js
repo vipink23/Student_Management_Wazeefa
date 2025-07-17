@@ -1,11 +1,12 @@
 import express from 'express';
 import StaffController from '../Controller/Staff.js'
+import verifyToken from '../Middleware/AuthMiddleware.js';
 
 
 const routes = express.Router();
 
 routes.post("/AddStaff", StaffController.AddStaff);
-routes.get("/GetAllStaff", StaffController.GetAllStaff);
+routes.get("/GetAllStaff",verifyToken, StaffController.GetAllStaff);
 // routes.post("/StaffLogin", StaffController.StaffLogin);
 routes.get("/StaffById/:id", StaffController.GetStaffbyId);
 
