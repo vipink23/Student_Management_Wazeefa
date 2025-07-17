@@ -18,6 +18,10 @@ const StudentSchema = Schema({
         type:String,
         required : true
     },
+    staff:{
+        type:mongoose.Types.ObjectId,
+        ref:"Staff"
+    }
 });
 
 const Studentschema = mongoose.model("Student", StudentSchema);

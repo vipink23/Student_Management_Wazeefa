@@ -6,7 +6,7 @@ const AddStudent = async (req, res) => {
   try {
     const existStudent = await StudentModel.find({ name: name });
     if (existStudent.length > 0) {
-      res.status(200).json({ resText: "Student Already Exist" });
+      res.status(200).json({ resText: "Student Already Exist", status:"exist" });
     } else {
       await StudentModel.create(req.body);
       res.status(200).json({ resText: "Added Sucessfully", status: "OK" });
@@ -17,8 +17,18 @@ const AddStudent = async (req, res) => {
 };
 const GetAllStudents = async (req, res) => {
   try {
-    const students = await StudentModel.find({});
-    res.status(200).json(students);
+    const students = await StudentModel.find({}).populate("staff").exec();
+    const studentsData = students.map((st) => ({
+      _id: st?._id,
+      studentname: st?.name,
+      grade: st?.grade,
+      contact: st?.contact,
+      age: st?.age,
+      staffName: st.staff?.name || "",
+      staff_id: st.staff?._id || null,
+    }));
+
+    res.status(200).json(studentsData);
   } catch (error) {
     return res.status(500).json("Internal Server Error");
   }

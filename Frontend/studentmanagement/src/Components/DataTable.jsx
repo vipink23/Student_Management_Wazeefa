@@ -19,6 +19,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { useState } from "react";
 import ModalForm from "../Pages/Modal";
 import CreateStaffModal from "../Pages/CreateStaffModal";
+import StudentModal from "../Pages/StudentModal";
 
 export default function DataTable({
   TableTitle,
@@ -26,6 +27,7 @@ export default function DataTable({
   columns = [],
   onSuccess,
   handleEdit,
+  handleDelete,
 }) {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -45,6 +47,7 @@ export default function DataTable({
 
   const isPermissionPage = window.location.pathname === "/PermissionMaster";
   const isStaffPage = window.location.pathname === "/StaffMaster";
+  const isStudentpage = window.location.pathname === "/StudentMaster";
 
   return (
     <Paper sx={{ width: "100%", overflow: "hidden" }}>
@@ -79,11 +82,11 @@ export default function DataTable({
               {Array.isArray(columns) &&
                 columns.map((column) => (
                   <TableCell
-                    key={column.id}
+                    key={column?.id}
                     align={column.align || "left"}
                     style={{ minWidth: column.minWidth || 100 }}
                   >
-                    {column.label}
+                    {column?.label}
                   </TableCell>
                 ))}
             </TableRow>
@@ -100,31 +103,31 @@ export default function DataTable({
                     tabIndex={-1}
                     key={row._id || index}
                   >
-                    {columns.map((column) => {
+                    {columns?.map((column) => {
                       let value;
 
-                      if (column.id === "slno") {
+                      if (column?.id === "slno") {
                         value = page * rowsPerPage + index + 1;
                       } else {
-                        value = row[column.id];
+                        value = row[column?.id];
                       }
 
                       return (
                         <TableCell
-                          key={column.id}
+                          key={column?.id}
                           align={column.align || "left"}
                         >
-                          {column.id === "_id" ? (
+                          {column?.id === "_id" ? (
                             <>
                               <IconButton
-                                onClick={() => handleEdit(row._id, "edit")}
+                                onClick={() => handleEdit(row?._id, "edit")}
                                 color="primary"
                                 size="small"
                               >
                                 <EditIcon />
                               </IconButton>
                               <IconButton
-                                onClick={() => console.log("Delete", row)} // add your delete logic
+                                onClick={() => handleDelete(row?._id)} // add your delete logic
                                 color="error"
                                 size="small"
                               >
@@ -166,6 +169,12 @@ export default function DataTable({
             handleCloseModal(); // Close modal
             if (onSuccess) onSuccess(); // Notify parent to refresh data
           }}
+        />
+      ) : isStudentpage ? (
+        <StudentModal
+          open={open}
+          handleClose={handleCloseModal}
+          title={TableTitle}
         />
       ) : (
         <ModalForm

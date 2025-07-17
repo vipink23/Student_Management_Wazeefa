@@ -2,12 +2,13 @@ import React, { useEffect, useState } from "react";
 import DataTable from "../Components/DataTable";
 import axios from "axios";
 import CreateStaffModal from "./CreateStaffModal";
+import Swal from "sweetalert2";
 
 const StaffMaster = () => {
   const [staff, setStaff] = useState([]);
   const [load, setLoad] = useState(false);
   const [open, setOpen] = useState(false);
-  const [val,setVal]= useState(null)
+  const [val, setVal] = useState({ val: "", id: "" });
 
   const getAllStaff = async () => {
     try {
@@ -33,19 +34,63 @@ const StaffMaster = () => {
     setLoad((prev) => !prev);
   };
 
-const [editData, setEditData] = useState(null);
- const handleEdit = async (id, val) => {
-    setVal(val)
-  try {
-    const res = await axios.get(`http://localhost:8080/StaffById/${id}`);
-    console.log(res.data, "response");
-    setEditData(res.data); 
-    setOpen(true); // open modal
-  } catch (error) {
-    console.error("Error fetching staff by ID:", error);
-  }
-};
+  const [editData, setEditData] = useState(null);
+  const handleEdit = async (id, val) => {
+    setVal((prev) => ({
+      ...prev,
+      val: val,
+      id: id,
+    }));
+    try {
+      const res = await axios.get(`http://localhost:8080/StaffById/${id}`);
+      console.log(res.data, "response");
+      setEditData(res.data);
+      setOpen(true); // open modal
+    } catch (error) {
+      console.error("Error fetching staff by ID:", error);
+    }
+  };
 
+  const handleDelete = async (id) => {
+    try {
+      const result = await Swal.fire({
+        title: "Are you sure?",
+        text: "You won't be able to revert this!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, delete it!",
+      });
+
+      if (result.isConfirmed) {
+        const resp = await axios.delete(
+          `http://localhost:8080/DeleteStaff/${id}`
+        );
+        if (resp.data.status === "OK" && resp.status === 200) {
+          Swal.fire({
+            title: "Deleted!",
+            text: "Staff has been deleted.",
+            icon: "success",
+          });
+          handleReload()
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: "Something went wrong!",
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Delete error:", error);
+      Swal.fire({
+        title: "Error!",
+        text: "Failed to delete staff.",
+        icon: "error",
+      });
+    }
+  };
 
   return (
     <div>
@@ -56,6 +101,7 @@ const [editData, setEditData] = useState(null);
         onSuccess={handleReload}
         setOpen={setOpen}
         handleEdit={handleEdit}
+        handleDelete={handleDelete}
       />
 
       <CreateStaffModal

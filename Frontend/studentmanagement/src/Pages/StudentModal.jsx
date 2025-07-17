@@ -9,7 +9,6 @@ import {
 import axios from "axios";
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
-import Swall from "sweetalert2";
 
 const style = {
   position: "absolute",
@@ -24,31 +23,31 @@ const style = {
   p: 4,
 };
 
-export default function CreateStaffModal({
+export default function StudentModal({
   open,
   handleClose,
   onSuccess,
   editData,
   value,
 }) {
-  const [roles, setRoles] = useState([]);
+  const [staff, setStaff] = useState([]);
   const [formData, setFormData] = useState({
     name: "",
-    role: "",
+    age: "",
+    grade: "",
     contact: "",
-    username: "",
-    password: "",
+    staff: "",
   });
-  const GetAllRoles = async () => {
+  const GetAllStaff = async () => {
     try {
-      const res = await axios.get("http://localhost:8080/GetAllRole");
-      setRoles(res?.data);
+      const res = await axios.get("http://localhost:8080/GetAllStaff");
+      setStaff(res?.data);
     } catch (error) {
       console.log(error, "err");
     }
   };
   useEffect(() => {
-    GetAllRoles();
+    GetAllStaff();
   }, []);
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -60,8 +59,14 @@ export default function CreateStaffModal({
 
   const handleSubmit = async () => {
     try {
-      const res = await axios.post("http://localhost:8080/AddStaff", formData);
+      const res = await axios.post(
+        "http://localhost:8080/AddStudent",
+        formData
+      );
+      console.log(res, "ressssss");
+
       if (res.data.status === "OK" && res.status === 200) {
+        if (onSuccess) onSuccess();
         handleClose();
 
         Swal.fire({
@@ -71,8 +76,8 @@ export default function CreateStaffModal({
           showConfirmButton: false,
           timer: 1900,
         });
-        if (onSuccess) onSuccess();
       } else if (res.data.status === "exist") {
+        handleClose();
         Swal.fire({
           icon: "error",
           title: "Oops...",
@@ -98,8 +103,9 @@ export default function CreateStaffModal({
       setFormData({
         name: editData?.name || "",
         contact: editData?.contact || "",
-        role: editData?.role?._id || "",
-        username: editData?.username || "",
+        staff: editData?.staff || "",
+        grade: editData?.grade || "",
+        age: editData?.age || "",
       });
     }
   }, [editData]);
@@ -112,19 +118,17 @@ export default function CreateStaffModal({
         formData.contact !== editData?.contact
           ? formData.contact
           : editData?.contact,
-      role:
-        formData.role !== editData?.role?._id
-          ? formData.role
-          : editData?.role?._id,
-      username:
-        formData.username !== editData?.username
-          ? formData.username
-          : editData?.username,
-      password: editData?.password,
+      staff:
+        formData.staff !== editData?.staff ? formData.staff : editData?.staff,
+      grade:
+        formData.grade !== editData?.grade ? formData.grade : editData?.grade,
+      age: formData.age !== editData?.age ? formData.age : editData?.age,
     };
+    console.log(data);
+
     try {
       const response = await axios.put(
-        `http://localhost:8080/UpdateStaff/${value?.id}`,
+        `http://localhost:8080/UpdateStudent/${value?.id}`,
         data
       );
       if (response.data.status === "OK" && response.status === 200) {
@@ -154,7 +158,7 @@ export default function CreateStaffModal({
     >
       <Box sx={style}>
         <Typography variant="h6" component="h2" gutterBottom>
-          {value?.val === "edit" ? "EDIT  STAFF" : "ADD STAFF"}
+          {value?.val === "edit" ? "EDIT  STUDENT" : "ADD STUDENT"}
         </Typography>
 
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 4 }}>
@@ -179,55 +183,47 @@ export default function CreateStaffModal({
               onChange={handleChange}
             />
           </Box>
-
           {/* Row 2 */}
           <Box sx={{ display: "flex", gap: 2 }}>
             <TextField
-              label="Role"
-              name="role"
+              label="Age"
+              type="text"
+              name="age"
+              fullWidth
+              size="small"
+              value={formData.age}
+              onChange={handleChange}
+            />
+            <TextField
+              label="Grade"
+              type="text"
+              name="grade"
+              fullWidth
+              size="small"
+              value={formData.grade}
+              onChange={handleChange}
+            />
+          </Box>
+          <Box sx={{ display: "flex", gap: 2 }}>
+            <TextField
+              label="Under"
+              name="staff"
               select
               size="small"
-              fullWidth
-              value={formData.role}
+              style={{ width: "49%" }}
+              value={formData.staff}
               onChange={handleChange}
             >
               <MenuItem value="">
-                <em>Select Role</em>
+                <em>Select Staff</em>
               </MenuItem>
-              {roles?.map((item) => (
+              {staff?.map((item) => (
                 <MenuItem key={item?._id} value={item?._id}>
                   {item?.name}
                 </MenuItem>
               ))}
             </TextField>
-
-            <TextField
-              label="UserName"
-              type="text"
-              name="username"
-              fullWidth
-              size="small"
-              value={formData.username}
-              onChange={handleChange}
-            />
           </Box>
-
-          {/* Row 3 */}
-          {value?.val === "edit" ? (
-            ""
-          ) : (
-            <Box sx={{ display: "flex", gap: 2 }}>
-              <TextField
-                label="Password"
-                type="password"
-                name="password"
-                style={{ width: "49%" }}
-                size="small"
-                value={formData.password}
-                onChange={handleChange}
-              />
-            </Box>
-          )}
         </Box>
 
         <Box

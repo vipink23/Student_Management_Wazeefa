@@ -91,7 +91,7 @@ const UpdateStaff = async (req, res) => {
     if (!staff) {
       return res.status(404).json({ resText: "Student not found" });
     }
-    await StaffModel.findByIdAndUpdate(id, req.body);
+    await StaffModel.findByIdAndUpdate(id, req.body , { new: true });
     return res
       .status(200)
       .json({ resText: "Updated Successfully", status: "OK" });
