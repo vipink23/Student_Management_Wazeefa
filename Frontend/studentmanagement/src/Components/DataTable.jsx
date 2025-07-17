@@ -181,6 +181,10 @@ export default function DataTable({
           open={open}
           handleClose={handleCloseModal}
           title={TableTitle}
+          onSuccess={()=>{
+            handleCloseModal();
+            if (onSuccess) onSuccess();
+          }}
         />
       )}
     </Paper>

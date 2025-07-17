@@ -79,6 +79,13 @@ export default function CreateStaffModal({
           text: res.data.resText,
         });
       }
+      setFormData(() => ({
+        name: "",
+        role: "",
+        contact: "",
+        username: "",
+        password: "",
+      }));
     } catch (error) {
       console.log(error, "error");
       handleClose();
@@ -137,6 +144,13 @@ export default function CreateStaffModal({
           showConfirmButton: false,
           timer: 1900,
         });
+        setFormData(() => ({
+          name: "",
+          role: "",
+          contact: "",
+          username: "",
+          password: "",
+        }));
         if (onSuccess) onSuccess();
       }
     } catch (error) {

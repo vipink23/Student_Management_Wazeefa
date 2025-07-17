@@ -67,16 +67,11 @@ export default function StudentModal({
   }, [user]);
 
   const handleSubmit = async () => {
-    console.log(formData, "dataaaaaa");
-
     try {
       const res = await axios.post("http://localhost:8080/AddStudent", {
         ...formData,
         permissions,
       });
-
-      console.log(res, "ressssss");
-
       if (res.data.status === "OK" && res.status === 200) {
         if (onSuccess) onSuccess();
         handleClose();
@@ -88,6 +83,13 @@ export default function StudentModal({
           showConfirmButton: false,
           timer: 1900,
         });
+        setFormData(() => ({
+          name: "",
+          age: "",
+          grade: "",
+          contact: "",
+          staff: "",
+        }));
       } else if (res.data.status === "exist") {
         handleClose();
         Swal.fire({

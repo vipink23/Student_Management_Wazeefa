@@ -35,6 +35,7 @@ const StudentMaster = () => {
   const Column = [
     { id: "slno", label: "SL No", minWidth: 170 },
     { id: "studentname", label: "Student Name", minWidth: 170 },
+    { id: "age", label: "Age", minWidth: 170 },
     { id: "contact", label: "Contact", minWidth: 170 },
     { id: "grade", label: "Grade", minWidth: 170 },
     { id: "staffName", label: "Under", minWidth: 170 },

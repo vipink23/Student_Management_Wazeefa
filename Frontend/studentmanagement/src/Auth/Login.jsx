@@ -29,44 +29,102 @@ const LoginPage = () => {
     password: "",
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState({
+  username: false,
+  password: false,
+});
+
+
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   try {
+  //     const resp = await axios.post("http://localhost:8080/Login", formData);
+  //     console.log(resp);
+  //     if (resp.data.status === "OK" && resp.status === 200) {
+  //       setIsLoading(true);
+  //       const decoded = jwtDecode(resp.data.accessToken);
+  //       dispatch(Login(decoded));
+  //       if (decoded.role === "Super Admin") {
+  //         setTimeout(() => {
+  //           navigate("/");
+  //         }, 2000);
+  //       } else {
+  //         navigate("/");
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.log(error, "err");
+  //     if (error.response.data.status === false && error.status === 404) {
+  //       Swal.fire({
+  //         icon: "error",
+  //         title: "Oops...",
+  //         text: `${error.response.data.message}`,
+  //       });
+  //     } else if (
+  //       error.response.data.status === "Invalid" &&
+  //       error.status === 400
+  //     ) {
+  //       Swal.fire({
+  //         icon: "error",
+  //         title: "Oops...",
+  //         text: `${error.response.data.message}`,
+  //       });
+  //     }
+  //   }
+  // };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const resp = await axios.post("http://localhost:8080/Login", formData);
-      console.log(resp);
-      if (resp.data.status === "OK" && resp.status === 200) {
-        setIsLoading(true);
-        const decoded = jwtDecode(resp.data.accessToken);
-        dispatch(Login(decoded));
-        if (decoded.role === "Super Admin") {
-          setTimeout(() => {
-            navigate("/");
-          }, 2000);
-        } else {
+  e.preventDefault();
+
+  const newErrors = {
+    username: formData.username.trim() === "",
+    password: formData.password.trim() === "",
+  };
+
+  // Set error state to show messages in TextFields
+  setErrors(newErrors);
+
+  // If any field is empty, stop submission
+  if (newErrors.username || newErrors.password) {
+    return;
+  }
+
+  try {
+    const resp = await axios.post("http://localhost:8080/Login", formData);
+    console.log(resp);
+    if (resp.data.status === "OK" && resp.status === 200) {
+      setIsLoading(true);
+      const decoded = jwtDecode(resp.data.accessToken);
+      dispatch(Login(decoded));
+      if (decoded.role === "Super Admin") {
+        setTimeout(() => {
           navigate("/");
-        }
-      }
-    } catch (error) {
-      console.log(error, "err");
-      if (error.response.data.status === false && error.status === 404) {
-        Swal.fire({
-          icon: "error",
-          title: "Oops...",
-          text: `${error.response.data.message}`,
-        });
-      } else if (
-        error.response.data.status === "Invalid" &&
-        error.status === 400
-      ) {
-        Swal.fire({
-          icon: "error",
-          title: "Oops...",
-          text: `${error.response.data.message}`,
-        });
+        }, 2000);
+      } else {
+        navigate("/");
       }
     }
-  };
+  } catch (error) {
+    console.log(error, "err");
+    if (error.response?.data?.status === false && error.response.status === 404) {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: `${error.response.data.message}`,
+      });
+    } else if (
+      error.response?.data?.status === "Invalid" &&
+      error.response.status === 400
+    ) {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: `${error.response.data.message}`,
+      });
+    }
+  }
+};
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -111,6 +169,8 @@ const LoginPage = () => {
             size="small"
             onChange={handleChange}
             value={formData.username}
+            error={errors.username}
+            helperText={errors.username ? "Username is required" : ""}
           />
           <TextField
             label="Password"
@@ -121,6 +181,8 @@ const LoginPage = () => {
             size="small"
             onChange={handleChange}
             value={formData.password}
+            error={errors.password}
+            helperText={errors.password ? "password is required" : ""}
           />
           {/* <Button
             variant="outlined"

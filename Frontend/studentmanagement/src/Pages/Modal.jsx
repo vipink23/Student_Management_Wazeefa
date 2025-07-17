@@ -9,6 +9,7 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import Swal from "sweetalert2";
 
 const style = {
   position: "absolute",
@@ -23,7 +24,7 @@ const style = {
   p: 4,
 };
 
-export default function ModalForm({ open, handleClose, title }) {
+export default function ModalForm({ open, handleClose, title,onSuccess }) {
   const [formData, setFormData] = useState({
     name: "",
     permission: [],
@@ -55,7 +56,18 @@ export default function ModalForm({ open, handleClose, title }) {
   const handleSubmit =async () => {
     const res= await axios.post("http://localhost:8080/AddRole", formData);
     console.log(res,'ress');
+          if (res.data.status === "OK" && res.status === 200) {
+            handleClose();
     
+            Swal.fire({
+              position: "top-end",
+              icon: "success",
+              title: "Your work has been Updated",
+              showConfirmButton: false,
+              timer: 1900,
+            });
+            if (onSuccess) onSuccess();
+          }
     handleClose();
   };
 
