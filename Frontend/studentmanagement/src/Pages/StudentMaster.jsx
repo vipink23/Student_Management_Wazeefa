@@ -4,23 +4,33 @@ import { useEffect } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
 import StudentModal from "./StudentModal";
+import { useSelector } from "react-redux";
 
 const StudentMaster = () => {
   const [students, setStudent] = useState([]);
   const [load, setLoad] = useState(false);
   const [open, setOpen] = useState(false);
   const [val, setVal] = useState({ val: "", id: "" });
-
-  const getAllStudent = async () => {
+  const user = useSelector((state) => state.user.user);
+  const staffId = user?.id;
+  const permissions = user.permission;
+  const getAllStudent = async (staffId) => {
     try {
-      const res = await axios.get("http://localhost:8080/GetAllStudent");
+      const res = await axios.get("http://localhost:8080/GetAllStudent", {
+        params: { id: staffId },
+      });
       setStudent(res.data);
     } catch (error) {
       console.log(error, "err");
     }
   };
+
   useEffect(() => {
-    getAllStudent();
+    if (user.role === "Super Admin") {
+      getAllStudent();
+    } else {
+      getAllStudent(staffId);
+    }
   }, [load]);
   const Column = [
     { id: "slno", label: "SL No", minWidth: 170 },
@@ -45,12 +55,20 @@ const StudentMaster = () => {
       id: id,
     }));
     try {
-      const res = await axios.get(`http://localhost:8080/GetStudentById/${id}`);
-      console.log(res.data, "response");
+      const res = await axios.post(`http://localhost:8080/GetStudentById`, {
+        id,
+        permissions,
+      });
       setEditData(res.data);
-      setOpen(true); // open modal
+      setOpen(true);
     } catch (error) {
-      console.error("Error fetching staff by ID:", error);
+      if (error.response.data.status === false && error.status === 403) {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: `${error.response.data.resText}. Please inform the higher authorities.`,
+        });
+      }
     }
   };
   const handleDelete = async (id) => {
@@ -66,9 +84,13 @@ const StudentMaster = () => {
       });
 
       if (result.isConfirmed) {
-        const resp = await axios.delete(
-          `http://localhost:8080/DeleteStudent/${id}`
-        );
+        // const resp = await axios.delete(
+        //   `http://localhost:8080/DeleteStudent/${id}`
+        // );
+        const resp = await axios.post("http://localhost:8080/DeleteStudent", {
+          id,
+          permissions,
+        });
         if (resp.data.status === "OK" && resp.status === 200) {
           Swal.fire({
             title: "Deleted!",
@@ -86,11 +108,13 @@ const StudentMaster = () => {
       }
     } catch (error) {
       console.error("Delete error:", error);
-      Swal.fire({
-        title: "Error!",
-        text: "Failed to delete staff.",
-        icon: "error",
-      });
+      if (error.response.data.status === false && error.status === 403) {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: `${error.response.data.resText}. Please inform the higher authorities.`,
+        });
+      }
     }
   };
   return (

@@ -14,11 +14,11 @@ const CheckPermission = (requiredPermission) => {
     const permissions = req.body.permissions;
 
     if (!Array.isArray(permissions)) {
-      return res.status(400).json({ resText: "Permissions must be an array." });
+      return res.status(400).json({ resText: "Permissions must be an array."});
     }
 
     if (!permissions.includes(requiredPermission)) {
-      return res.status(403).json({ resText: `Access Denied: '${requiredPermission}' permission required.` });
+      return res.status(403).json({ resText: `Access Denied: '${requiredPermission}' permission required.`, status:false });
     }
 
     next();

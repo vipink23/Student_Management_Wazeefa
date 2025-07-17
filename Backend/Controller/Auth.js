@@ -1,5 +1,5 @@
 import UserModel from "../Model/Auth.js";
-import StaffModel from '../Model/Staff.js'
+import StaffModel from "../Model/Staff.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
@@ -58,17 +58,25 @@ const Register = async (req, res) => {
 //   }
 // };
 
-
-
-
 const UnifiedLogin = async (req, res) => {
   const { username, password } = req.body;
 
   try {
     // Try finding in StaffModel first
-    let user = await StaffModel.findOne({ username }).populate("role").exec();
+    let user = await StaffModel.findOne({ username })
+      .populate({
+        path: "role",
+        populate: {
+          path: "permission",
+          model: "Permission",
+        },
+      })
+      .exec();
+
     if (user) {
       const isMatch = await bcrypt.compare(password, user.password);
+      console.log(user, "match");
+
       if (!isMatch)
         return res.status(400).json({ message: "Invalid Credential" });
 
@@ -77,19 +85,15 @@ const UnifiedLogin = async (req, res) => {
           id: user._id,
           username: user.username,
           name: user.name,
-          // role: {
-          //   rolename: user.role.name,
-          //   role_id: user.role._id,
-          // },
-          role:user?.role?.name,
-          role_id:user?.role?._id
-          
+          role: user?.role?.name,
+          role_id: user?.role?._id,
+          permission: user?.role?.permission?.map((p) => p.name) || [],
         },
         process.env.ACCESS_TOKEN,
         { expiresIn: "1h" }
       );
 
-      return res.status(200).json({ accessToken, status:"OK" });
+      return res.status(200).json({ accessToken, status: "OK" });
     }
 
     // If not in staff, try UserModel
@@ -104,20 +108,18 @@ const UnifiedLogin = async (req, res) => {
       {
         id: user._id,
         username: user.username,
-        username:user.firstname +" "+ user.lastname,
+        username: user.firstname + " " + user.lastname,
         role: user.role,
       },
       process.env.ACCESS_TOKEN,
       { expiresIn: "1h" }
     );
 
-    return res.status(200).json({ accessToken, status:"OK" });
+    return res.status(200).json({ accessToken, status: "OK" });
   } catch (error) {
     console.error("Login error:", error);
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
-
-
-export default {Register,UnifiedLogin}
+export default { Register, UnifiedLogin };

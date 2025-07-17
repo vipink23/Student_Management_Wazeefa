@@ -6,7 +6,9 @@ const AddStudent = async (req, res) => {
   try {
     const existStudent = await StudentModel.find({ name: name });
     if (existStudent.length > 0) {
-      res.status(200).json({ resText: "Student Already Exist", status:"exist" });
+      res
+        .status(200)
+        .json({ resText: "Student Already Exist", status: "exist" });
     } else {
       await StudentModel.create(req.body);
       res.status(200).json({ resText: "Added Sucessfully", status: "OK" });
@@ -33,8 +35,35 @@ const GetAllStudents = async (req, res) => {
     return res.status(500).json("Internal Server Error");
   }
 };
+
+const GetAllStudentsbyStaffID = async (req, res) => {
+  const { id } = req.query;
+
+  try {
+    // If ID is passed, filter by staff ID; otherwise, get all students
+    const filter = id ? { staff: id } : {};
+
+    const students = await StudentModel.find(filter).populate("staff").exec();
+
+    const studentsData = students.map((st) => ({
+      _id: st?._id,
+      studentname: st?.name,
+      grade: st?.grade,
+      contact: st?.contact,
+      age: st?.age,
+      staffName: st.staff?.name || "",
+      staff_id: st.staff?._id || null,
+    }));
+
+    res.status(200).json(studentsData);
+  } catch (error) {
+    console.error("Error fetching students:", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
 const GetStudentById = async (req, res) => {
-  const { id } = req.params;
+  const { id } = req.body;
   try {
     if (!id) {
       return res.status(400).json({ resText: "Id is required" });
@@ -73,15 +102,17 @@ const UpdateStudent = async (req, res) => {
       .json({ resText: "Updated Successfully", status: "OK" });
   } catch (error) {}
 };
+
 const DeleteStudent = async (req, res) => {
-  const { id } = req.params;
+  const { id } = req.body;
   try {
-    if (!id) {
-      return res.status(400).json({ resText: "Id is required" });
-    }
+    if (!id) return res.status(400).json({ resText: "Id is required" });
+
     await StudentModel.findByIdAndDelete(id);
     res.status(200).json({ resText: "Deleted Successfully", status: "OK" });
-  } catch (error) {}
+  } catch (error) {
+    res.status(500).json({ resText: "Internal Server Error" });
+  }
 };
 
 export default {
@@ -90,4 +121,5 @@ export default {
   GetStudentById,
   UpdateStudent,
   DeleteStudent,
+  GetAllStudentsbyStaffID,
 };
