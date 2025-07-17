@@ -75,10 +75,8 @@ const UnifiedLogin = async (req, res) => {
 
     if (user) {
       const isMatch = await bcrypt.compare(password, user.password);
-      console.log(user, "match");
-
       if (!isMatch)
-        return res.status(400).json({ message: "Invalid Credential" });
+        return res.status(400).json({ message: "Invalid Credential", status:"Invalid" });
 
       const accessToken = jwt.sign(
         {
@@ -97,19 +95,28 @@ const UnifiedLogin = async (req, res) => {
     }
 
     // If not in staff, try UserModel
-    user = await UserModel.findOne({ username });
-    if (!user) return res.status(404).json({ message: "username not found" });
+    user = await UserModel.findOne({ username }).populate({
+      path: "role",
+      populate: {
+        path: "permission",
+        model: "Permission",
+      },
+    });
+    console.log(user, "user");
+
+    if (!user) return res.status(404).json({ message: "username not found" , status:false});
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch)
-      return res.status(400).json({ message: "Invalid Credential" });
+      return res.status(400).json({ message: "Invalid Credential", status:"Invalid" });
 
     const accessToken = jwt.sign(
       {
         id: user._id,
-        username: user.username,
         username: user.firstname + " " + user.lastname,
-        role: user.role,
+        role: user?.role?.name,
+        role_id: user?.role?._id,
+        permission: user?.role?.permission?.map((p) => p.name) || [],
       },
       process.env.ACCESS_TOKEN,
       { expiresIn: "1h" }

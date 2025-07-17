@@ -19,6 +19,7 @@ import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router";
 import { useDispatch } from "react-redux";
 import { Login } from "./Features/Redux-Auth/UserSlicer";
+import Swal from "sweetalert2";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -37,23 +38,33 @@ const LoginPage = () => {
       if (resp.data.status === "OK" && resp.status === 200) {
         setIsLoading(true);
         const decoded = jwtDecode(resp.data.accessToken);
-        console.log(decoded, "decode");
-        dispatch(Login(decoded))
+        dispatch(Login(decoded));
         if (decoded.role === "Super Admin") {
           setTimeout(() => {
             navigate("/");
           }, 2000);
         } else {
-          navigate("/")
+          navigate("/");
         }
-
-        // dispatch(Login(decoded));
-        // setTimeout(() => {
-        //   navigate("/");
-        // }, 2000);
       }
     } catch (error) {
       console.log(error, "err");
+      if (error.response.data.status === false && error.status === 404) {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: `${error.response.data.message}`,
+        });
+      } else if (
+        error.response.data.status === "Invalid" &&
+        error.status === 400
+      ) {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: `${error.response.data.message}`,
+        });
+      }
     }
   };
 

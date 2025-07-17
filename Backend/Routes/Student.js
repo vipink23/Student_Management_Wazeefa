@@ -6,7 +6,7 @@ import CheckPermission from '../Middleware/RoleMiddleware.js';
 
 const routes = express.Router();
 
-routes.post("/AddStudent",StudentController.AddStudent);
+routes.post("/AddStudent",CheckPermission("Create"),StudentController.AddStudent);
 routes.get("/GetAllStudent", StudentController.GetAllStudentsbyStaffID);
 routes.post("/GetStudentById",CheckPermission("Update"), StudentController.GetStudentById);
 routes.put("/UpdateStudent/:id", StudentController.UpdateStudent);

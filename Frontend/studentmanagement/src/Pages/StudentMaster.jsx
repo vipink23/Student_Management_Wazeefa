@@ -84,9 +84,6 @@ const StudentMaster = () => {
       });
 
       if (result.isConfirmed) {
-        // const resp = await axios.delete(
-        //   `http://localhost:8080/DeleteStudent/${id}`
-        // );
         const resp = await axios.post("http://localhost:8080/DeleteStudent", {
           id,
           permissions,

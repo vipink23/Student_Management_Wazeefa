@@ -8,6 +8,7 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import Swal from "sweetalert2";
 
 const style = {
@@ -38,6 +39,9 @@ export default function StudentModal({
     contact: "",
     staff: "",
   });
+  const user = useSelector((state) => state.user.user);
+  let permissions = user?.permission;
+
   const GetAllStaff = async () => {
     try {
       const res = await axios.get("http://localhost:8080/GetAllStaff");
@@ -56,13 +60,21 @@ export default function StudentModal({
       [name]: value,
     }));
   };
+  useEffect(() => {
+    if (user?.role !== "Super Admin" && user?.id) {
+      setFormData((prev) => ({ ...prev, staff: user.id }));
+    }
+  }, [user]);
 
   const handleSubmit = async () => {
+    console.log(formData, "dataaaaaa");
+
     try {
-      const res = await axios.post(
-        "http://localhost:8080/AddStudent",
-        formData
-      );
+      const res = await axios.post("http://localhost:8080/AddStudent", {
+        ...formData,
+        permissions,
+      });
+
       console.log(res, "ressssss");
 
       if (res.data.status === "OK" && res.status === 200) {
@@ -88,11 +100,17 @@ export default function StudentModal({
       console.log(error, "error");
       handleClose();
 
-      if (error.response.data.status === "exist") {
+      if (error.response?.data?.status === "exist") {
         Swal.fire({
           icon: "error",
           title: "Oops...",
           text: error.response.data.resText,
+        });
+      } else if (error.response.data.status === false && error.status === 403) {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: `${error.response.data.resText}. Please inform the higher authorities.`,
         });
       }
     }
@@ -211,8 +229,25 @@ export default function StudentModal({
               select
               size="small"
               style={{ width: "49%" }}
-              value={formData.staff}
-              onChange={handleChange}
+              value={
+                user?.role === "Super Admin"
+                  ? formData.staff || ""
+                  : user?.id || ""
+              }
+              onChange={user?.role === "Super Admin" ? handleChange : undefined}
+              disabled={user?.role !== "Super Admin"}
+              error={
+                user?.role === "Super Admin" &&
+                formData.staff &&
+                !staff?.some((item) => item._id === formData.staff)
+              }
+              helperText={
+                user?.role === "Super Admin" &&
+                formData.staff &&
+                !staff?.some((item) => item._id === formData.staff)
+                  ? "Selected staff is not available in the list."
+                  : ""
+              }
             >
               <MenuItem value="">
                 <em>Select Staff</em>
